@@ -79,11 +79,21 @@ bool DirectoryInput::nextImage() {
     return true;
 }
 
-CameraInput::CameraInput(int device) {
-    _capture.open(device);
+CameraInput::CameraInput(int device) 
+{
+    int apiID = cv::CAP_ANY;      // 0 = autodetect default API
+    // open selected camera using selected API
+    _capture.open(device, apiID);
+    // check if we succeeded
+    if (!_capture.isOpened()) 
+    {
+        cerr << "ERROR! Unable to open camera\n";
+        //return -1;
+    }
 }
 
-bool CameraInput::nextImage() {
+bool CameraInput::nextImage() 
+{
     time(&_time);
     // read image from camera
     bool success = _capture.read(_img);
