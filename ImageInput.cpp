@@ -97,7 +97,11 @@ bool CameraInput::nextImage()
     time(&_time);
     // read image from camera
     bool success = _capture.read(_img);
-
+    // check if we succeeded
+    if (_img.empty()) 
+    {
+        cerr << "ERROR! blank frame grabbed\n";
+    }
     log4cpp::Category::getRoot() << log4cpp::Priority::INFO << "Image captured: " << success;
 
     // save copy of image if requested
