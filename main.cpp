@@ -38,7 +38,8 @@ static int delay = 1000;
 #define VERSION "0.9.7"
 #endif
 
-static void testOcr(ImageInput* pImageInput) {
+static void testOcr(ImageInput* pImageInput) 
+{
     log4cpp::Category::getRoot().info("testOcr");
 
     Config config;
@@ -50,34 +51,41 @@ static void testOcr(ImageInput* pImageInput) {
     Plausi plausi;
 
     KNearestOcr ocr(config);
-    if (! ocr.loadTrainingData()) {
+    if (! ocr.loadTrainingData()) 
+    {
         std::cout << "Failed to load OCR training data\n";
         return;
     }
     std::cout << "OCR training data loaded.\n";
     std::cout << "<q> to quit.\n";
 
-    while (pImageInput->nextImage()) {
+    while (pImageInput->nextImage()) 
+    {
         proc.setInput(pImageInput->getImage());
         proc.process();
 
         std::string result = ocr.recognize(proc.getOutput());
         std::cout << result;
-        if (plausi.check(result, pImageInput->getTime())) {
+        if (plausi.check(result, pImageInput->getTime())) 
+        {
             std::cout << "  " << std::fixed << std::setprecision(1) << plausi.getCheckedValue() << std::endl;
-        } else {
+        } 
+        else 
+        {
             std::cout << "  -------" << std::endl;
         }
         int key = cv::waitKey(delay) & 255;
 
-        if (key == 'q') {
+        if (key == 'q') 
+        {
             std::cout << "Quit\n";
             break;
         }
     }
 }
 
-static void learnOcr(ImageInput* pImageInput) {
+static void learnOcr(ImageInput* pImageInput) 
+{
     log4cpp::Category::getRoot().info("learnOcr");
 
     Config config;
@@ -91,26 +99,30 @@ static void learnOcr(ImageInput* pImageInput) {
     std::cout << "<0>..<9> to answer digit, <space> to ignore digit, <s> to save and quit, <q> to quit without saving.\n";
 
     int key = 0;
-    while (pImageInput->nextImage()) {
+    while (pImageInput->nextImage()) 
+    {
         proc.setInput(pImageInput->getImage());
         proc.process();
 
         key = ocr.learn(proc.getOutput());
         std::cout << std::endl;
 
-        if (key == 'q' || key == 's') {
+        if (key == 'q' || key == 's') 
+        {
             std::cout << "Quit\n";
             break;
         }
     }
 
-    if (key != 'q' && ocr.hasTrainingData()) {
+    if (key != 'q' && ocr.hasTrainingData()) 
+    {
         std::cout << "Saving training data\n";
         ocr.saveTrainingData();
     }
 }
 
-static void adjustCamera(ImageInput* pImageInput) {
+static void adjustCamera(ImageInput* pImageInput) 
+{
     log4cpp::Category::getRoot().info("adjustCamera");
 
     Config config;
@@ -126,43 +138,56 @@ static void adjustCamera(ImageInput* pImageInput) {
 
     bool processImage = true;
     int key = 0;
-    while (pImageInput->nextImage()) {
+    while (pImageInput->nextImage()) 
+    {
         proc.setInput(pImageInput->getImage());
-        if (processImage) {
+        if (processImage) 
+        {
             proc.process();
-        } else {
+        } 
+        else 
+        {
             proc.showImage();
         }
 
         key = cv::waitKey(delay) & 255;
 
-        if (key == 'q' || key == 's') {
+        if (key == 'q' || key == 's') 
+        {
             std::cout << "Quit\n";
             break;
-        } else if (key == 'r') {
+        } 
+        else if (key == 'r') 
+        {
             processImage = false;
-        } else if (key == 'p') {
+        } 
+        else if (key == 'p') 
+        {
             processImage = true;
         }
     }
-    if (key != 'q') {
+    if (key != 'q') 
+    {
         std::cout << "Saving config\n";
         config.saveConfig();
     }
 }
 
-static void capture(ImageInput* pImageInput) {
+static void capture(ImageInput* pImageInput) 
+{
     log4cpp::Category::getRoot().info("capture");
 
     std::cout << "Capturing images into directory.\n";
     std::cout << "<Ctrl-C> to quit.\n";
 
-    while (pImageInput->nextImage()) {
+    while (pImageInput->nextImage()) 
+    {
         usleep(delay*1000L);
     }
 }
 
-static void writeData(ImageInput* pImageInput) {
+static void writeData(ImageInput* pImageInput) 
+{
     log4cpp::Category::getRoot().info("writeData");
 
     Config config;
@@ -176,24 +201,29 @@ static void writeData(ImageInput* pImageInput) {
     struct stat st;
 
     KNearestOcr ocr(config);
-    if (! ocr.loadTrainingData()) {
+    if (! ocr.loadTrainingData()) 
+    {
         std::cout << "Failed to load OCR training data\n";
         return;
     }
     std::cout << "OCR training data loaded.\n";
     std::cout << "<Ctrl-C> to quit.\n";
 
-    while (pImageInput->nextImage()) {
+    while (pImageInput->nextImage()) 
+    {
         proc.setInput(pImageInput->getImage());
         proc.process();
 
-        if (proc.getOutput().size() == 7) {
+        if (proc.getOutput().size() == 7) 
+        {
             std::string result = ocr.recognize(proc.getOutput());
-            if (plausi.check(result, pImageInput->getTime())) {
+            if (plausi.check(result, pImageInput->getTime())) 
+            {
                 rrd.update(plausi.getCheckedTime(), plausi.getCheckedValue());
             }
         }
-        if (0 == stat("imgdebug", &st) && S_ISDIR(st.st_mode)) {
+        if (0 == stat("imgdebug", &st) && S_ISDIR(st.st_mode)) 
+        {
             // write debug image
             pImageInput->setOutputDir("imgdebug");
             pImageInput->saveImage();
@@ -203,7 +233,8 @@ static void writeData(ImageInput* pImageInput) {
     }
 }
 
-static void usage(const char* progname) {
+static void usage(const char* progname) 
+{
     std::cout << "Program to read and recognize the counter of an electricity meter with OpenCV.\n";
     std::cout << "Version: " << VERSION << std::endl;
     std::cout << "Usage: " << progname << " [-i <dir>|-c <cam>] [-l|-t|-a|-w|-o <dir>] [-s <delay>] [-v <level>\n";
@@ -221,7 +252,8 @@ static void usage(const char* progname) {
     std::cout << "  -v <l> : Log level. One of DEBUG, INFO, ERROR (default).\n";
 }
 
-static void configureLogging(const std::string & priority = "INFO", bool toConsole = false) {
+static void configureLogging(const std::string & priority = "INFO", bool toConsole = false) 
+{
     log4cpp::Appender *fileAppender = new log4cpp::FileAppender("default", "emeocv.log");
     log4cpp::PatternLayout* layout = new log4cpp::PatternLayout();
     layout->setConversionPattern("%d{%d.%m.%Y %H:%M:%S} %p: %m%n");
@@ -229,14 +261,16 @@ static void configureLogging(const std::string & priority = "INFO", bool toConso
     log4cpp::Category& root = log4cpp::Category::getRoot();
     root.setPriority(log4cpp::Priority::getPriorityValue(priority));
     root.addAppender(fileAppender);
-    if (toConsole) {
+    if (toConsole) 
+    {
         log4cpp::Appender *consoleAppender = new log4cpp::OstreamAppender("console", &std::cout);
         consoleAppender->setLayout(new log4cpp::SimpleLayout());
         root.addAppender(consoleAppender);
     }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
     int opt;
     ImageInput* pImageInput = 0;
     int inputCount = 0;
@@ -245,8 +279,10 @@ int main(int argc, char **argv) {
     char cmd = 0;
     int cmdCount = 0;
 
-    while ((opt = getopt(argc, argv, "i:c:ltaws:o:v:h")) != -1) {
-        switch (opt) {
+    while ((opt = getopt(argc, argv, "i:c:ltaws:o:v:h")) != -1) 
+    {
+        switch (opt) 
+        {
             case 'i':
                 pImageInput = new DirectoryInput(Directory(optarg, ".png"));
                 inputCount++;
@@ -280,12 +316,14 @@ int main(int argc, char **argv) {
                 break;
         }
     }
-    if (inputCount != 1) {
+    if (inputCount != 1) 
+    {
         std::cerr << "*** You should specify exactly one camera or input directory!\n\n";
         usage(argv[0]);
         exit(EXIT_FAILURE);
     }
-    if (cmdCount != 1) {
+    if (cmdCount != 1) 
+    {
         std::cerr << "*** You should specify exactly one operation!\n\n";
         usage(argv[0]);
         exit(EXIT_FAILURE);
@@ -293,7 +331,8 @@ int main(int argc, char **argv) {
 
     configureLogging(logLevel, cmd == 'a');
 
-    switch (cmd) {
+    switch (cmd) 
+    {
         case 'o':
             pImageInput->setOutputDir(outputDir);
             capture(pImageInput);
